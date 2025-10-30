@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat - EduICFES</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='chat.css') }}">
+</head>
+<body>
+    <div class="page-container">
+        <div class="sidebar">
+            <a href="{{ url_for('new_chat') }}" class="new-chat-btn">+ Nueva conversación</a>
+            <div class="chat-history-list">
+                <h5>Historial</h5>
+                <ul id="chat-list" class="chat-list"></ul>
+            </div>
+            <a href="{{ url_for('logout') }}" class="logout-btn">Cerrar Sesión</a>
+        </div>
+        <div class="chat-container">
+            <div class="chat-header">
+                <span>Bienvenido, {{ user }}</span>
+            </div>
+            <div class="chat-history" id="chat-history">
+                {% if not chat.history %}
+                <div class="welcome-message">
+                    <h2>¿Cómo puedo ayudarte hoy?</h2>
+                    <p>Puedes preguntarme sobre orientación vocacional, preparación para el ICFES, o técnicas de estudio.</p>
+                </div>
+                {% endif %}
+                {% for message in chat.history %}
+                    <div class="message {{ message.role }}">
+                        {{ message.content | markdown }}
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="input-box">
+                <input type="text" id="message-input" placeholder="Escribe tu mensaje...">
+                <button id="send-button">➤</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="chat-data" data-chat-id="{{ chat._id|string }}" style="display: none;"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatHistory = document.getElementById('chat-history');
+            const messageInput = document.getElementById('message-input');
+            const sendButton = document.getElementById('send-button');
+            const chatList = document.getElementById('chat-list');
+            const chatData = document.getElementById('chat-data');
+            const chatId = chatData.dataset.chatId;
+
+            async function loadChats() {
+                try {
+                    const response = await fetch('{{ url_for("get_user_chats") }}');
+                    const chats = await response.json();
+                    chatList.innerHTML = '';
+                    chats.forEach(chat => {
+                        const li = document.createElement('li');
+                        li.dataset.chatId = chat._id;
+
+                        const div = document.createElement('div');
+                        div.className = 'chat-item';
+
+                        const a = document.createElement('a');
+                        a.href = `/chat/${chat._id}`;
+                        a.textContent = chat.title;
+
+                        const button = document.createElement('button');
+                        button.className = 'delete-chat-btn';
+                        button.innerHTML = '<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"></path></svg>'; // Icono de papelera
+                        button.dataset.chatId = chat._id;
+
+                        div.appendChild(a);
+                        div.appendChild(button);
+                        li.appendChild(div);
+
+                        if (chat._id === chatId) {
+                            li.classList.add('active');
+                        }
+                        chatList.appendChild(li);
+                    });
+                } catch (error) {
+                    console.error('Error al cargar los chats:', error);
+                }
+            }
+
+            function createTypingIndicator() {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message', 'model', 'typing-indicator');
+                messageElement.innerHTML = '<span></span><span></span><span></span>';
+                chatHistory.appendChild(messageElement);
+                chatHistory.scrollTop = chatHistory.scrollHeight;
+                return messageElement;
+            }
+
+            function typeMessage(element, markdownText) {
+                const lines = markdownText.split('\n');
+                let lineIndex = 0;
+
+                function processLine() {
+                    if (lineIndex >= lines.length) return;
+
+                    const markdownLine = lines[lineIndex];
+                    
+                    // Si la línea está vacía, solo hacemos un salto de línea y continuamos.
+                    if (markdownLine.trim() === '') {
+                        element.innerHTML += '<br>';
+                        lineIndex++;
+                        processLine();
+                        return;
+                    }
+
+                    const finalHTML = marked.parse(markdownLine);
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = finalHTML;
+                    const plainText = tempDiv.textContent || tempDiv.innerText || "";
+
+                    const lineElement = document.createElement('div');
+                    element.appendChild(lineElement);
+
+                    let charIndex = 0;
+                    const interval = setInterval(() => {
+                        // Comprueba si el usuario está cerca del final antes de hacer autoscroll
+                        const isScrolledToBottom = chatHistory.scrollHeight - chatHistory.clientHeight <= chatHistory.scrollTop + 100;
+
+                        if (charIndex < plainText.length) {
+                            lineElement.textContent += plainText.charAt(charIndex);
+                            charIndex++;
+                            if (isScrolledToBottom) {
+                                chatHistory.scrollTop = chatHistory.scrollHeight;
+                            }
+                        } else {
+                            clearInterval(interval);
+                            lineElement.innerHTML = finalHTML;
+                            if (isScrolledToBottom) {
+                                chatHistory.scrollTop = chatHistory.scrollHeight;
+                            }
+                            lineIndex++;
+                            // Pequeña pausa antes de la siguiente línea
+                            setTimeout(processLine, 100);
+                        }
+                    }, 15);
+                }
+
+                processLine();
+            }
+
+            function addMessage(role, text, isTyping = false) {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message', role);
+                
+                if (role === 'user') {
+                    messageElement.innerHTML = marked.parse(text);
+                } else if (isTyping) {
+                    typeMessage(messageElement, text);
+                } else {
+                    messageElement.innerHTML = marked.parse(text);
+                }
+
+                chatHistory.appendChild(messageElement);
+                chatHistory.scrollTop = chatHistory.scrollHeight;
+                return messageElement;
+            }
+
+            async function sendMessage() {
+                const message = messageInput.value.trim();
+                if (message === '') return;
+
+                addMessage('user', message);
+                messageInput.value = '';
+
+                const typingIndicator = createTypingIndicator();
+
+                try {
+                    const response = await fetch('{{ url_for("send_message") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ message: message, chat_id: chatId })
+                    });
+
+                    const data = await response.json();
+                    chatHistory.removeChild(typingIndicator);
+                    addMessage('model', data.response, true); // true para activar el efecto de escritura
+
+                    // Si el servidor nos ha enviado un nuevo título, lo actualizamos en la lista
+                    if (data.new_title) {
+                        const currentChatItem = document.querySelector(`.chat-item a[href*="${chatId}"]`);
+                        if (currentChatItem) {
+                            currentChatItem.textContent = data.new_title;
+                        }
+                    }
+
+                } catch (error) {
+                    console.error('Error al enviar mensaje:', error);
+                    chatHistory.removeChild(typingIndicator);
+                    addMessage('model', 'Lo siento, hubo un error al conectar con el servidor.');
+                }
+            }
+
+            async function handleDeleteChat(e) {
+                if (!e.target.classList.contains('delete-chat-btn')) return;
+
+                const deleteButton = e.target;
+                const chatToDeleteId = deleteButton.dataset.chatId;
+
+                if (confirm('¿Estás seguro de que quieres eliminar este chat para siempre?')) {
+                    try {
+                        const response = await fetch(`/chat/delete/${chatToDeleteId}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        });
+
+                        if (response.ok) {
+                            // Si el chat eliminado es el actual, redirigir
+                            if (chatToDeleteId === chatId) {
+                                window.location.href = '{{ url_for("chat_page") }}';
+                            } else {
+                                // Si no, solo lo quitamos de la lista
+                                const listItem = deleteButton.closest('li');
+                                listItem.remove();
+                            }
+                        } else {
+                            alert('No se pudo eliminar el chat.');
+                        }
+                    } catch (error) {
+                        console.error('Error al eliminar el chat:', error);
+                        alert('Ocurrió un error al intentar eliminar el chat.');
+                    }
+                }
+            }
+
+            sendButton.addEventListener('click', sendMessage);
+            messageInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+
+            chatList.addEventListener('click', handleDeleteChat);
+
+            loadChats();
+        });
+    </script>
+</body>
+</html>

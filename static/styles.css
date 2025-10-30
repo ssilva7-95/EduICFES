@@ -1,0 +1,78 @@
+/* Fondo y cuerpo */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #36a3f7;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+/* Tarjeta principal */
+.card {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  width: 350px;
+}
+
+/* Título */
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+.tabs button {
+  flex: 1;
+  padding: 10px;
+  cursor: pointer;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: #eee;
+  transition: 0.3s;
+}
+.tabs button.active {
+  background: white;
+  border-bottom: 2px solid #36a3f7;
+  font-weight: bold;
+}
+
+/* Inputs y selects */
+input, select {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+/* Botón enviar */
+button.submit {
+  width: 100%;
+  background: #36a3f7;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+button.submit:hover {
+  background: #2c90d9;
+}
+
+/* Mensajes de error */
+.error {
+  color: red;
+  text-align: center;
+  margin-top: 10px;
+}

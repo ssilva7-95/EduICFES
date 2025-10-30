@@ -47,6 +47,30 @@ En caso de que no esté incluido, instala también **google-generativeai**:
 pip install google-generativeai
 ```
 
+En caso de que no este incluido, instala **pymongo**:
+```bash
+pip install pymongo
+```
+
+En caso de que no este incluido, instala **bcrypt**:
+```bash
+pip install bcrypt
+```
+
+En caso de que no este incluido, instala **flask**:
+```bash
+pip install flask
+```
+
+En caso de que no este incluido, instala **markdown**:
+```bash
+pip install markdown
+```
+
+En caso de que no este incluido, instala **markupsafe**:
+```bash
+pip install markupsafe
+```
 ---
 
 ##  Configuración de la API Key
