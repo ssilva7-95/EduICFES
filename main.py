@@ -30,7 +30,7 @@ load_dotenv()
 API_KEY = getenv("API_KEY")
 genai.configure(api_key=API_KEY)
 
-MODELO = 'gemini-2.5-flash'
+MODELO = 'gemini-2.5-flash-lite'
 config = GenerationConfig()
 model = genai.GenerativeModel(
     model_name=MODELO,

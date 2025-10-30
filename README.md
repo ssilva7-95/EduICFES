@@ -1,10 +1,10 @@
-# EduICFES - Chatbot Orientador Motivacional 
+# EduICFES - Chatbot Orientador Motivacional
 
 Este proyecto es un **chatbot con Inteligencia Artificial** desarrollado en **Python 3.12**, pensado para orientar a estudiantes en su camino educativo, ayudarlos a practicar para las pruebas **Saber ICFES**, brindar orientación vocacional y enseñar técnicas de relajación y mindfulness.
 
 ---
 
-##  Características principales
+## Características principales
 
 - Orientación vocacional y preparación académica.
 - Preguntas y ejercicios estilo **Saber ICFES**.
@@ -14,7 +14,7 @@ Este proyecto es un **chatbot con Inteligencia Artificial** desarrollado en **Py
 
 ---
 
-##  Requisitos
+## Requisitos
 
 - **Python 3.12**
 - Librerías necesarias:
@@ -26,7 +26,8 @@ python-dotenv
 
 ---
 
-##  Instalación
+## Instalación
+
 1. Crea y activa un entorno virtual (opcional pero recomendado):
 
 ```bash
@@ -48,32 +49,38 @@ pip install google-generativeai
 ```
 
 En caso de que no este incluido, instala **pymongo**:
+
 ```bash
 pip install pymongo
 ```
 
 En caso de que no este incluido, instala **bcrypt**:
+
 ```bash
 pip install bcrypt
 ```
 
 En caso de que no este incluido, instala **flask**:
+
 ```bash
 pip install flask
 ```
 
 En caso de que no este incluido, instala **markdown**:
+
 ```bash
 pip install markdown
 ```
 
 En caso de que no este incluido, instala **markupsafe**:
+
 ```bash
 pip install markupsafe
 ```
+
 ---
 
-##  Configuración de la API Key
+## Configuración de la API Key
 
 1. Crea un archivo **.env** en la raíz del proyecto con el siguiente contenido:
 
@@ -85,37 +92,35 @@ API_KEY=tu_api_key_aqui
 
 ---
 
-##  Uso
-El bot iniciará con un mensaje de bienvenida. Puedes interactuar escribiendo tus preguntas o dudas.
-Para finalizar la conversación, escribe:
-
-```
-terminar
-```
-
----
-
-##  Estructura del proyecto
+## Estructura del proyecto
 
 ```
 EduICFES/
-│── main.py             # Código principal del chatbot
-│── README.md           # Documentación del proyecto
-│── .env                # API Key (NO subir a GitHub)
-│── requirements.txt    # Dependencias necesarias
-│── venv/               # Entorno virtual (ignorar en GitHub)
+│
+├── static/                 # Archivos estáticos (CSS, JS, imágenes, etc.)
+├── templates/              # Plantillas HTML del sitio
+│   ├── chat.html           # Interfaz del chat educativo
+│   ├── login.html          # Página de inicio de sesión
+│   └── register.html       # Página de registro de usuarios
+│
+├── database.py             # Conexión y gestión de la base de datos
+├── main.py                 # Archivo principal para ejecutar la aplicación Flask
+├── requirements.txt        # Dependencias necesarias para el entorno
+├── .env                    # Variables de entorno (configuración sensible)
+├── .gitignore              # Archivos y carpetas que se excluyen del control de versiones
+└── README.md               # Documentación del proyecto
 ```
 
 ---
 
-##  Notas
+## Notas
 
 - El modelo utilizado es: **gemini-2.5-flash-lite**.
 - Si ocurre un error, revisa tu **.env** y tu conexión a internet.
 
 ---
 
-##  Futuras mejoras
+## Futuras mejoras
 
 - Guardar historial de estudiantes con un sistema de memoria.
 - Interfaz gráfica o integración con aplicaciones móviles/web.
